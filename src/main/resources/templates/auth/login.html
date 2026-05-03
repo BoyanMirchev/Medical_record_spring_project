@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Sign in · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="auth-layout">
+    <section class="auth-card">
+        <h1>Sign in</h1>
+        <p class="subtitle">Use your account credentials.</p>
+
+        <div class="success-banner" th:if="${param.registered != null}">
+            Registration completed. You can sign in now.
+        </div>
+
+        <div class="global-error" th:if="${param.error != null}">
+            Invalid username or password.
+        </div>
+
+        <div class="success-banner" th:if="${param.logout != null}">
+            You have been signed out.
+        </div>
+
+        <form th:action="@{/login}" method="post" class="auth-form">
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input id="username"
+                       name="username"
+                       type="text"
+                       autocomplete="username"
+                       required>
+            </div>
+
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input id="password"
+                       name="password"
+                       type="password"
+                       autocomplete="current-password"
+                       required>
+            </div>
+
+            <button type="submit" class="btn btn--primary auth-submit">
+                Sign in
+            </button>
+        </form>
+
+        <p class="muted auth-switch">
+            No account?
+            <a th:href="@{/register}">Register</a>
+        </p>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

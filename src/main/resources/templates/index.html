@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Home · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Medical records</h1>
+            <p sec:authorize="!isAuthenticated()">
+                Sign in to manage patients, examinations, diagnoses, and sick leave.
+            </p>
+            <p sec:authorize="isAuthenticated()">
+                Choose a section to continue working in the system.
+            </p>
+        </div>
+    </div>
+
+    <div sec:authorize="!isAuthenticated()" class="card">
+        <p class="muted" style="margin:0 0 1rem;">You are not signed in.</p>
+        <div class="actions-row">
+            <a class="btn btn--primary" th:href="@{/login}">Sign in</a>
+            <a class="btn btn--ghost" th:href="@{/register}">Create account</a>
+        </div>
+    </div>
+
+    <div sec:authorize="hasRole('ADMIN')" class="dashboard-grid">
+        <a class="dashboard-card dashboard-link" th:href="@{/patients}">
+            <h2>Patients</h2>
+            <p>Profiles, personal doctors, and visit history.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/examinations}">
+            <h2>Examinations</h2>
+            <p>Visits, treatments, pricing, and payer information.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/diagnoses}">
+            <h2>Diagnoses</h2>
+            <p>Codes and clinical descriptions.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/doctors}">
+            <h2>Doctors</h2>
+            <p>Staff, specialties, and personal-doctor eligibility.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/sick-leaves}">
+            <h2>Sick leave</h2>
+            <p>Certificates linked to examinations.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+    </div>
+
+    <div sec:authorize="hasRole('DOCTOR')" class="dashboard-grid">
+        <a class="dashboard-card dashboard-link" th:href="@{/patients}">
+            <h2>Patients</h2>
+            <p>Open patient records and review visit history.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/examinations}">
+            <h2>Examinations</h2>
+            <p>Create and update examinations you have performed.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/diagnoses}">
+            <h2>Diagnoses</h2>
+            <p>Browse diagnosis records used in examinations.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/doctors}">
+            <h2>Doctors</h2>
+            <p>View doctor profiles and specialties.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/sick-leaves}">
+            <h2>Sick leave</h2>
+            <p>Issue and manage sick leave certificates.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+    </div>
+
+    <div sec:authorize="hasRole('PATIENT')" class="dashboard-grid">
+        <a class="dashboard-card dashboard-link" th:href="@{/patients}">
+            <h2>My profile</h2>
+            <p>Review your personal details and personal doctor.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/examinations}">
+            <h2>My examinations</h2>
+            <p>View your medical visit history.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/diagnoses}">
+            <h2>My diagnoses</h2>
+            <p>See diagnoses connected to your examinations.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+
+        <a class="dashboard-card dashboard-link" th:href="@{/sick-leaves}">
+            <h2>My sick leave</h2>
+            <p>Review issued sick leave certificates.</p>
+            <span class="btn btn--primary btn--sm">Open</span>
+        </a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

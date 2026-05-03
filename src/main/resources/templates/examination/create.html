@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New examination · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>New examination</h1>
+            <p>Record a visit with diagnosis and payment details.</p>
+        </div>
+        <a class="btn btn--ghost" th:href="@{/examinations}">Cancel</a>
+    </div>
+
+    <div class="card">
+        <div class="api-error" data-api-error role="alert"></div>
+
+        <form id="exam-create-form"
+              data-method="POST"
+              th:data-action="@{/api/examinations}"
+              data-redirect="/examinations"
+              novalidate>
+
+            <div class="form-grid form-grid--2">
+                <div class="form-field">
+                    <label for="examDate">Exam date &amp; time</label>
+                    <input id="examDate" name="examDate" type="datetime-local" required>
+                    <span class="field-error" data-field-error="examDate"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="price">Price</label>
+                    <input id="price" name="price" type="number" step="0.01" min="0" required value="0">
+                    <span class="field-error" data-field-error="price"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="doctorId">Doctor</label>
+                    <select id="doctorId" name="doctorId" required>
+                        <option value="">Select…</option>
+                        <option th:each="d : ${doctors}"
+                                th:value="${d.id}"
+                                th:text="${d.firstName + ' ' + d.lastName + ' — ' + d.doctorIdentifier}">
+                            doc
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="doctorId"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="patientId">Patient</label>
+                    <select id="patientId" name="patientId" required>
+                        <option value="">Select…</option>
+                        <option th:each="p : ${patients}"
+                                th:value="${p.id}"
+                                th:text="${p.firstName + ' ' + p.lastName + ' (' + p.egn + ')'}">
+                            pat
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="patientId"></span>
+                </div>
+
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label for="diagnosisId">Diagnosis</label>
+                    <select id="diagnosisId" name="diagnosisId" required>
+                        <option value="">Select…</option>
+                        <option th:each="x : ${diagnoses}"
+                                th:value="${x.id}"
+                                th:text="${x.code + ' — ' + x.name}">
+                            dx
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="diagnosisId"></span>
+                </div>
+
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label for="treatmentText">Treatment</label>
+                    <textarea id="treatmentText" name="treatmentText" required></textarea>
+                    <span class="field-error" data-field-error="treatmentText"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="paidBy">Paid by</label>
+                    <select id="paidBy" name="paidBy" required>
+                        <option value="PATIENT">Patient</option>
+                        <option value="NHIF">NHIF</option>
+                    </select>
+                    <span class="field-error" data-field-error="paidBy"></span>
+                </div>
+
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" placeholder="Optional"></textarea>
+                    <span class="field-error" data-field-error="notes"></span>
+                </div>
+            </div>
+
+            <div class="actions-row" style="margin-top:1.25rem;">
+                <button type="submit" class="btn btn--primary">Save examination</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+    (function () {
+        var dt = document.getElementById("examDate");
+        if (dt && !dt.value) {
+            var n = new Date();
+            n.setMinutes(n.getMinutes() - n.getTimezoneOffset());
+            dt.value = n.toISOString().slice(0, 16);
+        }
+
+        var form = document.getElementById("exam-create-form");
+        if (!form || !window.medicalRecordApi) return;
+
+        function clearFieldErrors() {
+            form.querySelectorAll("[data-field-error]").forEach(function (el) {
+                el.textContent = "";
+            });
+        }
+
+        window.medicalRecordApi.bindJsonForm(form, function (f) {
+            clearFieldErrors();
+
+            var raw = f.examDate.value;
+            if (!raw) throw new Error("Exam date is required.");
+
+            var iso = raw.length === 16 ? raw + ":00" : raw;
+            var doctorId = parseInt(f.doctorId.value, 10);
+            var patientId = parseInt(f.patientId.value, 10);
+            var diagnosisId = parseInt(f.diagnosisId.value, 10);
+            var treatmentText = f.treatmentText.value.trim();
+            var price = parseFloat(f.price.value);
+            var notes = f.notes.value.trim();
+
+            if (!doctorId) throw new Error("Doctor is required.");
+            if (!patientId) throw new Error("Patient is required.");
+            if (!diagnosisId) throw new Error("Diagnosis is required.");
+            if (!treatmentText) throw new Error("Treatment is required.");
+            if (Number.isNaN(price) || price < 0) throw new Error("Price must be 0 or greater.");
+
+            return {
+                examDate: iso,
+                doctorId: doctorId,
+                patientId: patientId,
+                diagnosisId: diagnosisId,
+                treatmentText: treatmentText,
+                price: price.toFixed(2),
+                paidBy: f.paidBy.value,
+                notes: notes || null
+            };
+        });
+    })();
+</script>
+</body>
+</html>

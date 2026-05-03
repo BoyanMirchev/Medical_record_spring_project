@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New sick leave · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>New sick leave</h1>
+            <p>Attach leave to an existing examination.</p>
+        </div>
+        <a class="btn btn--ghost" th:href="@{/sick-leaves}">Cancel</a>
+    </div>
+
+    <div class="card">
+        <div class="api-error" data-api-error role="alert"></div>
+
+        <form id="sl-create-form"
+              data-method="POST"
+              th:data-action="@{/api/sick-leaves}"
+              data-redirect="/sick-leaves"
+              novalidate>
+
+            <div class="form-grid form-grid--2">
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label for="examinationId">Examination</label>
+                    <select id="examinationId" name="examinationId" required>
+                        <option value="">Select examination…</option>
+                        <option th:each="e : ${examinations}"
+                                th:value="${e.id}"
+                                th:text="'#' + ${e.id} + ' · ' + ${#temporals.format(e.examDate, 'yyyy-MM-dd HH:mm')} + ' · ' + ${e.patient.firstName} + ' ' + ${e.patient.lastName}">
+                            exam
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="examinationId"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="startDate">Start date</label>
+                    <input id="startDate" name="startDate" type="date" required>
+                    <span class="field-error" data-field-error="startDate"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="daysCount">Days</label>
+                    <input id="daysCount" name="daysCount" type="number" min="1" step="1" required value="1">
+                    <span class="field-error" data-field-error="daysCount"></span>
+                </div>
+            </div>
+
+            <div class="actions-row" style="margin-top:1.25rem;">
+                <button type="submit" class="btn btn--primary">Save</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+    (function () {
+        var sd = document.getElementById("startDate");
+        if (sd && !sd.value) {
+            var t = new Date();
+            t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
+            sd.value = t.toISOString().slice(0, 10);
+        }
+
+        var form = document.getElementById("sl-create-form");
+        if (!form || !window.medicalRecordApi) return;
+
+        function clearFieldErrors() {
+            form.querySelectorAll("[data-field-error]").forEach(function (el) {
+                el.textContent = "";
+            });
+        }
+
+        window.medicalRecordApi.bindJsonForm(form, function (f) {
+            clearFieldErrors();
+
+            var examinationId = parseInt(f.examinationId.value, 10);
+            var startDate = f.startDate.value;
+            var daysCount = parseInt(f.daysCount.value, 10);
+
+            if (!examinationId) throw new Error("Examination is required.");
+            if (!startDate) throw new Error("Start date is required.");
+            if (!daysCount || daysCount < 1) throw new Error("Days must be at least 1.");
+
+            return {
+                examinationId: examinationId,
+                startDate: startDate,
+                daysCount: daysCount
+            };
+        });
+    })();
+</script>
+</body>
+</html>

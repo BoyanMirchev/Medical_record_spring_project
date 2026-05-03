@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<th:block th:fragment="head-links">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</th:block>
+
+<header class="site-header" th:fragment="header">
+    <div class="site-header__inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand__icon">+</span>
+            <span>Medical Records</span>
+        </a>
+
+        <nav class="nav-links">
+            <th:block sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/patients}">Patients</a>
+                <a th:href="@{/examinations}">Examinations</a>
+                <a th:href="@{/diagnoses}">Diagnoses</a>
+                <a th:href="@{/doctors}">Doctors</a>
+                <a th:href="@{/sick-leaves}">Sick leaves</a>
+            </th:block>
+
+            <th:block sec:authorize="hasRole('DOCTOR')">
+                <a th:href="@{/patients}">Patients</a>
+                <a th:href="@{/examinations}">Examinations</a>
+                <a th:href="@{/diagnoses}">Diagnoses</a>
+                <a th:href="@{/doctors}">Doctors</a>
+                <a th:href="@{/sick-leaves}">Sick leaves</a>
+            </th:block>
+
+            <th:block sec:authorize="hasRole('PATIENT')">
+                <a th:href="@{/patients}">My profile</a>
+                <a th:href="@{/examinations}">My examinations</a>
+                <a th:href="@{/diagnoses}">My diagnoses</a>
+                <a th:href="@{/sick-leaves}">My sick leaves</a>
+            </th:block>
+
+            <th:block sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}">Sign in</a>
+                <a th:href="@{/register}">Register</a>
+            </th:block>
+
+            <th:block sec:authorize="isAuthenticated()">
+                <span class="nav-user">
+                    Signed in as <strong sec:authentication="name">user</strong>
+                </span>
+                <form th:action="@{/logout}" method="post" class="inline-form">
+                    <button type="submit" class="btn btn--ghost btn--sm">Sign out</button>
+                </form>
+            </th:block>
+        </nav>
+    </div>
+</header>
+
+<footer class="site-footer" th:fragment="footer">
+    Medical record system · Thymeleaf UI
+</footer>
+
+<th:block th:fragment="scripts">
+    <script th:src="@{/js/api-client.js}"></script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="auth-layout">
+    <section class="auth-card">
+        <h1>Create account</h1>
+        <p class="subtitle">Choose a role that matches how you will use the system.</p>
+
+        <form th:action="@{/register}"
+              th:object="${userRegisterDto}"
+              method="post"
+              novalidate
+              class="auth-form">
+
+            <div class="global-error" th:if="${#fields.hasGlobalErrors()}">
+                <ul class="error-list">
+                    <li th:each="e : ${#fields.globalErrors()}" th:text="${e}">Error</li>
+                </ul>
+            </div>
+
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input id="username"
+                       th:field="*{username}"
+                       type="text"
+                       autocomplete="username"
+                       required>
+                <span class="field-error"
+                      th:if="${#fields.hasErrors('username')}"
+                      th:errors="*{username}"></span>
+            </div>
+
+            <div class="form-field">
+                <label for="email">Email</label>
+                <input id="email"
+                       th:field="*{email}"
+                       type="email"
+                       autocomplete="email"
+                       required>
+                <span class="field-error"
+                      th:if="${#fields.hasErrors('email')}"
+                      th:errors="*{email}"></span>
+            </div>
+
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input id="password"
+                       th:field="*{password}"
+                       type="password"
+                       autocomplete="new-password"
+                       required>
+                <span class="field-error"
+                      th:if="${#fields.hasErrors('password')}"
+                      th:errors="*{password}"></span>
+            </div>
+
+            <div class="form-field">
+                <label for="confirmPassword">Confirm password</label>
+                <input id="confirmPassword"
+                       th:field="*{confirmPassword}"
+                       type="password"
+                       autocomplete="new-password"
+                       required>
+                <span class="field-error"
+                      th:if="${#fields.hasErrors('confirmPassword')}"
+                      th:errors="*{confirmPassword}"></span>
+            </div>
+
+            <div class="form-field">
+                <label for="roleId">Role</label>
+                <select id="roleId" th:field="*{roleId}" required>
+                    <option value="">Select role…</option>
+                    <option th:each="r : ${roles}"
+                            th:value="${r.id}"
+                            th:text="${r.roleName}">
+                        ROLE
+                    </option>
+                </select>
+                <span class="field-error"
+                      th:if="${#fields.hasErrors('roleId')}"
+                      th:errors="*{roleId}"></span>
+            </div>
+
+            <button type="submit" class="btn btn--primary auth-submit">
+                Register
+            </button>
+        </form>
+
+        <p class="muted auth-switch">
+            Already have an account?
+            <a th:href="@{/login}">Sign in</a>
+        </p>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

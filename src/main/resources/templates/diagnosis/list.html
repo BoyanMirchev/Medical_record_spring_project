@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Diagnoses · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Diagnoses</h1>
+            <p>Reference diagnoses used in examinations.</p>
+        </div>
+        <a sec:authorize="hasRole('ADMIN')"
+           class="btn btn--primary"
+           th:href="@{/diagnoses/create}">
+            New diagnosis
+        </a>
+    </div>
+
+    <div class="table-wrap" th:if="${!diagnoses.isEmpty()}">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${diagnoses}">
+                <td th:text="${d.id}">1</td>
+                <td th:text="${d.code}">A00</td>
+                <td th:text="${d.name}">Name</td>
+                <td th:text="${d.description != null and !#strings.isEmpty(d.description) ? d.description : '—'}">—</td>
+                <td class="actions-row">
+                    <a sec:authorize="hasRole('ADMIN')"
+                       class="btn btn--ghost btn--sm"
+                       th:href="@{/diagnoses/{id}/edit(id=${d.id})}">
+                        Edit
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card card--muted" th:if="${diagnoses.isEmpty()}">
+        <p class="muted" style="margin:0;">No diagnoses defined.</p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

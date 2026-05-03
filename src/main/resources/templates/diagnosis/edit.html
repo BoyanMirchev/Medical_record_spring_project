@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Edit diagnosis · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Edit diagnosis</h1>
+            <p>Update code, name, or description.</p>
+        </div>
+        <a class="btn btn--ghost" th:href="@{/diagnoses}">Back to list</a>
+    </div>
+
+    <div class="card">
+        <div class="api-error" data-api-error role="alert"></div>
+
+        <form id="diagnosis-edit-form"
+              data-method="PUT"
+              th:data-action="@{/api/diagnoses/{id}(id=${diagnosisEditDto.id})}"
+              data-redirect="/diagnoses"
+              novalidate>
+
+            <div class="form-grid form-grid--2">
+                <div class="form-field">
+                    <label for="code">Code</label>
+                    <input id="code" name="code" type="text" maxlength="20" required th:value="${diagnosisEditDto.code}">
+                    <span class="field-error" data-field-error="code"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text" maxlength="100" required th:value="${diagnosisEditDto.name}">
+                    <span class="field-error" data-field-error="name"></span>
+                </div>
+
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" th:text="${diagnosisEditDto.description}"></textarea>
+                    <span class="field-error" data-field-error="description"></span>
+                </div>
+            </div>
+
+            <div class="actions-row" style="margin-top:1.25rem;">
+                <button type="submit" class="btn btn--primary">Save changes</button>
+
+                <button sec:authorize="hasRole('ADMIN')"
+                        type="button"
+                        class="btn btn--danger"
+                        id="diagnosis-delete">
+                    Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script th:inline="javascript">
+    (function () {
+        var form = document.getElementById("diagnosis-edit-form");
+
+        function clearFieldErrors() {
+            if (!form) return;
+            form.querySelectorAll("[data-field-error]").forEach(function (el) {
+                el.textContent = "";
+            });
+        }
+
+        if (form && window.medicalRecordApi) {
+            window.medicalRecordApi.bindJsonForm(form, function (f) {
+                clearFieldErrors();
+
+                var code = f.code.value.trim();
+                var name = f.name.value.trim();
+                var description = f.description.value.trim();
+
+                if (!code) throw new Error("Code is required.");
+                if (!name) throw new Error("Name is required.");
+
+                return {
+                    id: /*[[${diagnosisEditDto.id}]]*/ 0,
+                    code: code,
+                    name: name,
+                    description: description || null
+                };
+            });
+        }
+
+        var del = document.getElementById("diagnosis-delete");
+        var errorBox = document.querySelector("[data-api-error]");
+
+        if (del && window.medicalRecordApi) {
+            del.addEventListener("click", function () {
+                if (!confirm("Delete this diagnosis? Linked examinations may be affected.")) {
+                    return;
+                }
+
+                var id = /*[[${diagnosisEditDto.id}]]*/ 0;
+
+                window.medicalRecordApi.request("DELETE", "/api/diagnoses/" + id, null)
+                    .then(function () {
+                        window.location.href = "/diagnoses";
+                    })
+                    .catch(function (err) {
+                        if (errorBox) {
+                            errorBox.textContent = window.medicalRecordApi.formatApiError(err.status, err.body);
+                            errorBox.style.display = "block";
+                        }
+                    });
+            });
+        }
+    })();
+</script>
+</body>
+</html>

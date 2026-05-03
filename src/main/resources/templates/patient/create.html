@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New patient · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>New patient</h1>
+            <p>Link a user account to clinical demographics.</p>
+        </div>
+        <a class="btn btn--ghost" th:href="@{/patients}">Cancel</a>
+    </div>
+
+    <div class="card">
+        <div class="api-error" data-api-error role="alert"></div>
+
+        <form id="patient-create-form"
+              data-method="POST"
+              th:data-action="@{/api/patients}"
+              data-redirect="/patients"
+              novalidate>
+
+            <div class="form-grid form-grid--2">
+                <div class="form-field">
+                    <label for="userId">User account</label>
+                    <select id="userId" name="userId" required>
+                        <option value="">Select user…</option>
+                        <option th:each="u : ${users}"
+                                th:value="${u.id}"
+                                th:text="${u.username + ' (' + u.email + ')'}">
+                            user
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="userId"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="personalDoctorId">Personal doctor</label>
+                    <select id="personalDoctorId" name="personalDoctorId" required>
+                        <option value="">Select doctor…</option>
+                        <option th:each="d : ${personalDoctors}"
+                                th:value="${d.id}"
+                                th:text="${d.firstName + ' ' + d.lastName + ' — ' + d.doctorIdentifier}">
+                            doc
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="personalDoctorId"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="egn">EGN (10 digits)</label>
+                    <input id="egn" name="egn" type="text" maxlength="10" pattern="\d{10}" required>
+                    <span class="field-error" data-field-error="egn"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="dateOfBirth">Date of birth</label>
+                    <input id="dateOfBirth" name="dateOfBirth" type="date">
+                    <span class="field-error" data-field-error="dateOfBirth"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="firstName">First name</label>
+                    <input id="firstName" name="firstName" type="text" required maxlength="50">
+                    <span class="field-error" data-field-error="firstName"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="lastName">Last name</label>
+                    <input id="lastName" name="lastName" type="text" required maxlength="50">
+                    <span class="field-error" data-field-error="lastName"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="gender">Gender</label>
+                    <input id="gender" name="gender" type="text" maxlength="10" placeholder="Optional">
+                    <span class="field-error" data-field-error="gender"></span>
+                </div>
+            </div>
+
+            <div class="actions-row" style="margin-top:1.25rem;">
+                <button type="submit" class="btn btn--primary">Save patient</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+    (function () {
+        var form = document.getElementById("patient-create-form");
+        if (!form || !window.medicalRecordApi) return;
+
+        function clearFieldErrors() {
+            form.querySelectorAll("[data-field-error]").forEach(function (el) {
+                el.textContent = "";
+            });
+        }
+
+        window.medicalRecordApi.bindJsonForm(form, function (f) {
+            clearFieldErrors();
+
+            var userId = parseInt(f.userId.value, 10);
+            var personalDoctorId = parseInt(f.personalDoctorId.value, 10);
+            var egn = f.egn.value.trim();
+            var firstName = f.firstName.value.trim();
+            var lastName = f.lastName.value.trim();
+            var dob = f.dateOfBirth.value;
+            var gender = f.gender.value.trim();
+
+            if (!userId) throw new Error("User account is required.");
+            if (!personalDoctorId) throw new Error("Personal doctor is required.");
+            if (!/^\d{10}$/.test(egn)) throw new Error("EGN must contain exactly 10 digits.");
+            if (!firstName) throw new Error("First name is required.");
+            if (!lastName) throw new Error("Last name is required.");
+
+            return {
+                userId: userId,
+                personalDoctorId: personalDoctorId,
+                egn: egn,
+                firstName: firstName,
+                lastName: lastName,
+                dateOfBirth: dob || null,
+                gender: gender || null
+            };
+        });
+    })();
+</script>
+</body>
+</html>

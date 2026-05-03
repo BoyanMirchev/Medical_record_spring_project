@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Examination · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Examination #<span th:text="${examination.id}">0</span></h1>
+            <p th:text="${#temporals.format(examination.examDate, 'yyyy-MM-dd HH:mm')}">date</p>
+        </div>
+        <div class="actions-row">
+            <a class="btn btn--ghost" th:href="@{/examinations}">Back to list</a>
+            <a sec:authorize="hasAnyRole('ADMIN','DOCTOR')" class="btn btn--primary"
+               th:href="@{/examinations/{id}/edit(id=${examination.id})}">Edit</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="form-grid form-grid--2">
+            <div class="muted">Patient</div>
+            <div>
+                <a th:href="@{/patients/{id}(id=${examination.patient.id})}"
+                   th:text="${examination.patient.firstName + ' ' + examination.patient.lastName}">Patient</a>
+            </div>
+            <div class="muted">Doctor</div>
+            <div th:text="${examination.doctor.firstName + ' ' + examination.doctor.lastName + ' (' + examination.doctor.doctorIdentifier + ')'}">
+                —
+            </div>
+            <div class="muted">Diagnosis</div>
+            <div th:text="${examination.diagnosis.code + ' — ' + examination.diagnosis.name}">—</div>
+            <div class="muted">Price</div>
+            <div th:text="${examination.price}">0</div>
+            <div class="muted">Paid by</div>
+            <div th:text="${examination.paidBy}">—</div>
+        </div>
+        <h2 style="font-size:1rem;margin:1.25rem 0 0.5rem;">Treatment</h2>
+        <div class="text-block" th:text="${examination.treatmentText}">—</div>
+        <th:block th:if="${examination.notes != null && !examination.notes.isEmpty()}">
+            <h2 style="font-size:1rem;margin:1.25rem 0 0.5rem;">Notes</h2>
+            <div class="text-block muted" th:text="${examination.notes}">—</div>
+        </th:block>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

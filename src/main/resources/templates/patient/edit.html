@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Edit patient · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Edit patient</h1>
+            <p>Update demographics and linked accounts.</p>
+        </div>
+        <a class="btn btn--ghost" th:href="@{/patients/{id}(id=${patientEditDto.id})}">Back</a>
+    </div>
+
+    <div class="card">
+        <div class="api-error" data-api-error role="alert"></div>
+
+        <form id="patient-edit-form"
+              data-method="PUT"
+              th:data-action="@{/api/patients/{id}(id=${patientEditDto.id})}"
+              data-redirect="/patients"
+              novalidate>
+
+            <div class="form-grid form-grid--2">
+                <div class="form-field">
+                    <label for="userId">User account</label>
+                    <select id="userId" name="userId" required>
+                        <option th:each="u : ${users}"
+                                th:value="${u.id}"
+                                th:selected="${u.id == patientEditDto.userId}"
+                                th:text="${u.username + ' (' + u.email + ')'}">
+                            user
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="userId"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="personalDoctorId">Personal doctor</label>
+                    <select id="personalDoctorId" name="personalDoctorId" required>
+                        <option th:each="d : ${personalDoctors}"
+                                th:value="${d.id}"
+                                th:selected="${d.id == patientEditDto.personalDoctorId}"
+                                th:text="${d.firstName + ' ' + d.lastName + ' — ' + d.doctorIdentifier}">
+                            doc
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="personalDoctorId"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="egn">EGN (10 digits)</label>
+                    <input id="egn"
+                           name="egn"
+                           type="text"
+                           maxlength="10"
+                           pattern="\d{10}"
+                           required
+                           th:value="${patientEditDto.egn}">
+                    <span class="field-error" data-field-error="egn"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="dateOfBirth">Date of birth</label>
+                    <input id="dateOfBirth"
+                           name="dateOfBirth"
+                           type="date"
+                           th:value="${patientEditDto.dateOfBirth != null ? #temporals.format(patientEditDto.dateOfBirth, 'yyyy-MM-dd') : ''}">
+                    <span class="field-error" data-field-error="dateOfBirth"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="firstName">First name</label>
+                    <input id="firstName"
+                           name="firstName"
+                           type="text"
+                           required
+                           maxlength="50"
+                           th:value="${patientEditDto.firstName}">
+                    <span class="field-error" data-field-error="firstName"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="lastName">Last name</label>
+                    <input id="lastName"
+                           name="lastName"
+                           type="text"
+                           required
+                           maxlength="50"
+                           th:value="${patientEditDto.lastName}">
+                    <span class="field-error" data-field-error="lastName"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="gender">Gender</label>
+                    <input id="gender" name="gender" type="text" maxlength="10" th:value="${patientEditDto.gender}">
+                    <span class="field-error" data-field-error="gender"></span>
+                </div>
+            </div>
+
+            <div class="actions-row" style="margin-top:1.25rem;">
+                <button type="submit" class="btn btn--primary">Save changes</button>
+                <button sec:authorize="hasRole('ADMIN')" type="button" class="btn btn--danger" id="patient-delete">
+                    Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script th:inline="javascript">
+    (function () {
+        var form = document.getElementById("patient-edit-form");
+        var errorBox = document.querySelector("[data-api-error]");
+
+        function clearFieldErrors() {
+            if (!form) return;
+            form.querySelectorAll("[data-field-error]").forEach(function (el) {
+                el.textContent = "";
+            });
+        }
+
+        if (form && window.medicalRecordApi) {
+            window.medicalRecordApi.bindJsonForm(form, function (f) {
+                clearFieldErrors();
+
+                var userId = parseInt(f.userId.value, 10);
+                var personalDoctorId = parseInt(f.personalDoctorId.value, 10);
+                var egn = f.egn.value.trim();
+                var firstName = f.firstName.value.trim();
+                var lastName = f.lastName.value.trim();
+                var dob = f.dateOfBirth.value;
+                var gender = f.gender.value.trim();
+
+                if (!userId) throw new Error("User account is required.");
+                if (!personalDoctorId) throw new Error("Personal doctor is required.");
+                if (!/^\d{10}$/.test(egn)) throw new Error("EGN must contain exactly 10 digits.");
+                if (!firstName) throw new Error("First name is required.");
+                if (!lastName) throw new Error("Last name is required.");
+
+                return {
+                    id: /*[[${patientEditDto.id}]]*/ 0,
+                    userId: userId,
+                    personalDoctorId: personalDoctorId,
+                    egn: egn,
+                    firstName: firstName,
+                    lastName: lastName,
+                    dateOfBirth: dob || null,
+                    gender: gender || null
+                };
+            });
+        }
+
+        var del = document.getElementById("patient-delete");
+        if (del && window.medicalRecordApi) {
+            del.addEventListener("click", function () {
+                if (!confirm("Delete this patient permanently?")) return;
+
+                var id = /*[[${patientEditDto.id}]]*/ 0;
+
+                window.medicalRecordApi.request("DELETE", "/api/patients/" + id, null)
+                    .then(function () {
+                        window.location.href = "/patients";
+                    })
+                    .catch(function (err) {
+                        if (errorBox) {
+                            errorBox.textContent = window.medicalRecordApi.formatApiError(err.status, err.body);
+                            errorBox.style.display = "block";
+                        }
+                    });
+            });
+        }
+    })();
+</script>
+</body>
+</html>

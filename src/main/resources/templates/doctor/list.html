@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Doctors · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Doctors</h1>
+            <p>Clinical staff and specialties.</p>
+        </div>
+        <a sec:authorize="hasRole('ADMIN')" class="btn btn--primary" th:href="@{/doctors/create}">New doctor</a>
+    </div>
+
+    <div class="table-wrap" th:if="${!doctors.isEmpty()}">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Identifier</th>
+                <th>Specialty</th>
+                <th>Personal GP</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${doctors}">
+                <td th:text="${d.id}">1</td>
+                <td th:text="${d.firstName + ' ' + d.lastName}">Name</td>
+                <td th:text="${d.doctorIdentifier}">ID</td>
+                <td th:text="${d.specialty.name}">Spec</td>
+                <td th:text="${d.canBePersonalDoctor ? 'Yes' : 'No'}">—</td>
+                <td class="actions-row">
+                    <a sec:authorize="hasRole('ADMIN')" class="btn btn--ghost btn--sm"
+                       th:href="@{/doctors/{id}/edit(id=${d.id})}">Edit</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card card--muted" th:if="${doctors.isEmpty()}">
+        <p class="muted" style="margin:0;">No doctors in the directory.</p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

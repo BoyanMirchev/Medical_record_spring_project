@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Examinations · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Examinations</h1>
+            <p>Clinical visits and billing.</p>
+        </div>
+        <a sec:authorize="hasAnyRole('ADMIN','DOCTOR')" class="btn btn--primary" th:href="@{/examinations/create}">New
+            examination</a>
+    </div>
+
+    <div class="table-wrap" th:if="${!examinations.isEmpty()}">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Diagnosis</th>
+                <th>Price</th>
+                <th>Paid by</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="e : ${examinations}">
+                <td th:text="${e.id}">1</td>
+                <td th:text="${#temporals.format(e.examDate, 'yyyy-MM-dd HH:mm')}">—</td>
+                <td th:text="${e.patient.firstName + ' ' + e.patient.lastName}">—</td>
+                <td th:text="${e.doctor.firstName + ' ' + e.doctor.lastName}">—</td>
+                <td th:text="${e.diagnosis.name}">—</td>
+                <td th:text="${e.price}">0</td>
+                <td th:text="${e.paidBy}">—</td>
+                <td class="actions-row">
+                    <a class="btn btn--ghost btn--sm" th:href="@{/examinations/{id}(id=${e.id})}">View</a>
+                    <a sec:authorize="hasAnyRole('ADMIN','DOCTOR')" class="btn btn--ghost btn--sm"
+                       th:href="@{/examinations/{id}/edit(id=${e.id})}">Edit</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card card--muted" th:if="${examinations.isEmpty()}">
+        <p class="muted" style="margin:0;">No examinations recorded.</p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

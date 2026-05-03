@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Patients · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Patients</h1>
+            <p>Registered patients and their personal doctors.</p>
+        </div>
+        <a sec:authorize="hasRole('ADMIN')" class="btn btn--primary" th:href="@{/patients/create}">New patient</a>
+    </div>
+
+    <div class="table-wrap" th:if="${!patients.isEmpty()}">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>EGN</th>
+                <th>Personal doctor</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${patients}">
+                <td th:text="${p.id}">1</td>
+                <td th:text="${p.firstName + ' ' + p.lastName}">Name</td>
+                <td th:text="${p.egn}">0000000000</td>
+                <td th:text="${p.personalDoctor.firstName + ' ' + p.personalDoctor.lastName}">Dr</td>
+                <td class="actions-row">
+                    <a class="btn btn--ghost btn--sm" th:href="@{/patients/{id}(id=${p.id})}">View</a>
+                    <a sec:authorize="hasAnyRole('ADMIN','PATIENT')" class="btn btn--ghost btn--sm"
+                       th:href="@{/patients/{id}/edit(id=${p.id})}">Edit</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card card--muted" th:if="${patients.isEmpty()}">
+        <p class="muted" style="margin:0;">No patients yet.</p>
+        <a sec:authorize="hasRole('ADMIN')" class="btn btn--primary btn--sm" style="margin-top:0.75rem;"
+           th:href="@{/patients/create}">Add the first patient</a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

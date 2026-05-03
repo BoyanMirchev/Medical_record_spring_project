@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Sick leave · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Sick leave</h1>
+            <p>Certificates issued from examinations.</p>
+        </div>
+        <a sec:authorize="hasAnyRole('ADMIN','DOCTOR')" class="btn btn--primary" th:href="@{/sick-leaves/create}">New sick
+            leave</a>
+    </div>
+
+    <div class="table-wrap" th:if="${!sickLeaves.isEmpty()}">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Examination</th>
+                <th>Patient</th>
+                <th>Start</th>
+                <th>Days</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${sickLeaves}">
+                <td th:text="${s.id}">1</td>
+                <td>
+                    <a th:href="@{/examinations/{id}(id=${s.examination.id})}" th:text="'#' + ${s.examination.id}">#1</a>
+                </td>
+                <td th:text="${s.examination.patient.firstName + ' ' + s.examination.patient.lastName}">—</td>
+                <td th:text="${#temporals.format(s.startDate, 'yyyy-MM-dd')}">—</td>
+                <td th:text="${s.daysCount}">0</td>
+                <td class="actions-row">
+                    <a sec:authorize="hasAnyRole('ADMIN','DOCTOR')" class="btn btn--ghost btn--sm"
+                       th:href="@{/sick-leaves/{id}/edit(id=${s.id})}">Edit</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card card--muted" th:if="${sickLeaves.isEmpty()}">
+        <p class="muted" style="margin:0;">No sick leave records.</p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

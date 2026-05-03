@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Edit sick leave · Medical Records</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>Edit sick leave</h1>
+            <p>Adjust dates or linked examination.</p>
+        </div>
+        <a class="btn btn--ghost" th:href="@{/sick-leaves}">Back to list</a>
+    </div>
+
+    <div class="card">
+        <div class="api-error" data-api-error role="alert"></div>
+
+        <form id="sl-edit-form"
+              data-method="PUT"
+              th:data-action="@{/api/sick-leaves/{id}(id=${sickLeaveEditDto.id})}"
+              data-redirect="/sick-leaves"
+              novalidate>
+
+            <div class="form-grid form-grid--2">
+                <div class="form-field" style="grid-column:1/-1;">
+                    <label for="examinationId">Examination</label>
+                    <select id="examinationId" name="examinationId" required>
+                        <option th:each="e : ${examinations}"
+                                th:value="${e.id}"
+                                th:selected="${e.id == sickLeaveEditDto.examinationId}"
+                                th:text="'#' + ${e.id} + ' · ' + ${#temporals.format(e.examDate, 'yyyy-MM-dd HH:mm')} + ' · ' + ${e.patient.firstName} + ' ' + ${e.patient.lastName}">
+                            exam
+                        </option>
+                    </select>
+                    <span class="field-error" data-field-error="examinationId"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="startDate">Start date</label>
+                    <input id="startDate"
+                           name="startDate"
+                           type="date"
+                           required
+                           th:value="${#temporals.format(sickLeaveEditDto.startDate, 'yyyy-MM-dd')}">
+                    <span class="field-error" data-field-error="startDate"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="daysCount">Days</label>
+                    <input id="daysCount"
+                           name="daysCount"
+                           type="number"
+                           min="1"
+                           step="1"
+                           required
+                           th:value="${sickLeaveEditDto.daysCount}">
+                    <span class="field-error" data-field-error="daysCount"></span>
+                </div>
+            </div>
+
+            <div class="actions-row" style="margin-top:1.25rem;">
+                <button type="submit" class="btn btn--primary">Save changes</button>
+                <button sec:authorize="hasRole('ADMIN')" type="button" class="btn btn--danger" id="sl-delete">
+                    Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script th:inline="javascript">
+    (function () {
+        var form = document.getElementById("sl-edit-form");
+        var errorBox = document.querySelector("[data-api-error]");
+
+        function clearFieldErrors() {
+            if (!form) return;
+            form.querySelectorAll("[data-field-error]").forEach(function (el) {
+                el.textContent = "";
+            });
+        }
+
+        if (form && window.medicalRecordApi) {
+            window.medicalRecordApi.bindJsonForm(form, function (f) {
+                clearFieldErrors();
+
+                var examinationId = parseInt(f.examinationId.value, 10);
+                var startDate = f.startDate.value;
+                var daysCount = parseInt(f.daysCount.value, 10);
+
+                if (!examinationId) throw new Error("Examination is required.");
+                if (!startDate) throw new Error("Start date is required.");
+                if (!daysCount || daysCount < 1) throw new Error("Days must be at least 1.");
+
+                return {
+                    id: /*[[${sickLeaveEditDto.id}]]*/ 0,
+                    examinationId: examinationId,
+                    startDate: startDate,
+                    daysCount: daysCount
+                };
+            });
+        }
+
+        var del = document.getElementById("sl-delete");
+        if (del && window.medicalRecordApi) {
+            del.addEventListener("click", function () {
+                if (!confirm("Delete this sick leave record?")) return;
+
+                var id = /*[[${sickLeaveEditDto.id}]]*/ 0;
+
+                window.medicalRecordApi.request("DELETE", "/api/sick-leaves/" + id, null)
+                    .then(function () {
+                        window.location.href = "/sick-leaves";
+                    })
+                    .catch(function (err) {
+                        if (errorBox) {
+                            errorBox.textContent = window.medicalRecordApi.formatApiError(err.status, err.body);
+                            errorBox.style.display = "block";
+                        }
+                    });
+            });
+        }
+    })();
+</script>
+</body>
+</html>

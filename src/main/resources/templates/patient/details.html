@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="${patient.firstName + ' ' + patient.lastName + ' · Patient'}">Patient</title>
+    <th:block th:replace="~{fragments/layout :: head-links}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1 th:text="${patient.firstName + ' ' + patient.lastName}">Patient</h1>
+            <p>EGN <span th:text="${patient.egn}">0000000000</span>
+                · User <span th:text="${patient.user.username}">user</span></p>
+        </div>
+        <div class="actions-row">
+            <a class="btn btn--ghost" th:href="@{/patients}">Back to list</a>
+            <a sec:authorize="hasAnyRole('ADMIN','PATIENT')" class="btn btn--primary"
+               th:href="@{/patients/{id}/edit(id=${patient.id})}">Edit</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="margin:0 0 1rem;font-size:1rem;">Details</h2>
+        <div class="form-grid form-grid--2">
+            <div class="muted">Date of birth</div>
+            <div th:text="${patient.dateOfBirth != null ? #temporals.format(patient.dateOfBirth, 'yyyy-MM-dd') : '—'}">—</div>
+            <div class="muted">Gender</div>
+            <div th:text="${patient.gender != null && !patient.gender.isEmpty() ? patient.gender : '—'}">—</div>
+            <div class="muted">Personal doctor</div>
+            <div th:text="${patient.personalDoctor.firstName + ' ' + patient.personalDoctor.lastName + ' (' + patient.personalDoctor.doctorIdentifier + ')'}">
+                —
+            </div>
+        </div>
+    </div>
+
+    <h2 style="font-size:1.1rem;margin:1.5rem 0 0.75rem;">Examination history</h2>
+    <div class="table-wrap" th:if="${!history.isEmpty()}">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Doctor</th>
+                <th>Diagnosis</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="e : ${history}">
+                <td th:text="${e.id}">1</td>
+                <td th:text="${#temporals.format(e.examDate, 'yyyy-MM-dd HH:mm')}">—</td>
+                <td th:text="${e.doctor.firstName + ' ' + e.doctor.lastName}">—</td>
+                <td th:text="${e.diagnosis.name}">—</td>
+                <td><a class="btn btn--ghost btn--sm" th:href="@{/examinations/{id}(id=${e.id})}">Open</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card card--muted" th:if="${history.isEmpty()}">
+        <p class="muted" style="margin:0;">No examinations recorded for this patient.</p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

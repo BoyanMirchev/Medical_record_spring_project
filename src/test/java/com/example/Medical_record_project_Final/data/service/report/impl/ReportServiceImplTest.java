@@ -21,11 +21,6 @@ class ReportServiceImplTest {
     @Mock
     private ExaminationRepository examinationRepository;
 
-    @Mock
-    private PatientRepository patientRepository;
-
-    @Mock
-    private SickLeaveRepository sickLeaveRepository;
 
     @InjectMocks
     private ReportServiceImpl reportService;

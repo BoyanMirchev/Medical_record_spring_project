@@ -1,9 +1,6 @@
 package com.example.Medical_record_project_Final.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
@@ -27,6 +24,8 @@ public class PatientEditDto {
     @Size(max = 50, message = "Last name must be up to 50 characters.")
     private String lastName;
 
+    @NotBlank(message = "Date of birth is required")
+    @PastOrPresent(message = "Date of birth cannot be in the future")
     private LocalDate dateOfBirth;
 
     @Size(max = 10, message = "Gender must be up to 10 characters.")

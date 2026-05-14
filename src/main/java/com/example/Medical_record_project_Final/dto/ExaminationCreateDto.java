@@ -2,6 +2,7 @@ package com.example.Medical_record_project_Final.dto;
 
 import com.example.Medical_record_project_Final.data.entity.enums.PaidBy;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -27,6 +28,7 @@ public class ExaminationCreateDto {
 
     @NotNull(message = "Price is required.")
     @DecimalMin(value = "0.00", message = "Price cannot be negative.")
+    @Digits(integer = 8, fraction = 2, message = "Price must have up to 8 digits and 2 decimals")
     private BigDecimal price;
 
     @NotNull(message = "Paid by is required.")

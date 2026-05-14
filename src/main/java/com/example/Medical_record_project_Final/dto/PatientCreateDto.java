@@ -1,15 +1,13 @@
 package com.example.Medical_record_project_Final.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
 public class PatientCreateDto {
 
     @NotNull(message = "User id is required.")
+    @Positive(message = "User id must be positive.")
     private Integer userId;
 
     @NotBlank(message = "EGN is required.")
@@ -24,6 +22,8 @@ public class PatientCreateDto {
     @Size(max = 50, message = "Last name must be up to 50 characters.")
     private String lastName;
 
+    @Past(message = "Date of birth must be in the past.")
+    @PastOrPresent(message = "Date of birth cannot be in the future")
     private LocalDate dateOfBirth;
 
     @Size(max = 10, message = "Gender must be up to 10 characters.")
@@ -35,6 +35,8 @@ public class PatientCreateDto {
     public PatientCreateDto() {
     }
 
+    @NotNull(message = "User id is required.")
+    @Positive(message = "User id must be positive.")
     public Integer getUserId() {
         return userId;
     }

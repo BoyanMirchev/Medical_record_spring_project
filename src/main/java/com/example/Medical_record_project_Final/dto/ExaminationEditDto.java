@@ -4,6 +4,7 @@ import com.example.Medical_record_project_Final.data.entity.enums.PaidBy;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ public class ExaminationEditDto {
     private Integer id;
 
     @NotNull(message = "Exam date is required.")
+    @PastOrPresent(message = "Exam date cannot be in the future.")
     private LocalDateTime examDate;
 
     @NotNull(message = "Doctor id is required.")

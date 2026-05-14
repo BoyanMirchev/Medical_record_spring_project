@@ -1,10 +1,7 @@
 package com.example.Medical_record_project_Final.dto;
 
 import com.example.Medical_record_project_Final.data.entity.enums.PaidBy;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 public class ExaminationCreateDto {
 
     @NotNull(message = "Exam date is required.")
+    @PastOrPresent(message = "Exam date cannot be in the future.")
     private LocalDateTime examDate;
 
     @NotNull(message = "Doctor id is required.")

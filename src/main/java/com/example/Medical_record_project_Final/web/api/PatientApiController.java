@@ -4,6 +4,7 @@ import com.example.Medical_record_project_Final.data.entity.Doctor;
 import com.example.Medical_record_project_Final.data.entity.Examination;
 import com.example.Medical_record_project_Final.data.entity.Patient;
 import com.example.Medical_record_project_Final.data.entity.User;
+import com.example.Medical_record_project_Final.data.service.AccessService;
 import com.example.Medical_record_project_Final.data.service.DoctorService;
 import com.example.Medical_record_project_Final.data.service.PatientService;
 import com.example.Medical_record_project_Final.data.service.UserService;
@@ -23,13 +24,16 @@ public class PatientApiController {
     private final PatientService patientService;
     private final UserService userService;
     private final DoctorService doctorService;
+    private final AccessService accessService;
 
     public PatientApiController(PatientService patientService,
                                 UserService userService,
-                                DoctorService doctorService) {
+                                DoctorService doctorService,
+                                AccessService accessService) {
         this.patientService = patientService;
         this.userService = userService;
         this.doctorService = doctorService;
+        this.accessService = accessService;
     }
 
     @GetMapping
@@ -39,6 +43,7 @@ public class PatientApiController {
 
     @GetMapping("/{id}")
     public Patient getById(@PathVariable Integer id) {
+        accessService.checkCanAccessPatient(id);
         return patientService.getById(id);
     }
 
@@ -54,6 +59,7 @@ public class PatientApiController {
 
     @GetMapping("/{patientId}/history")
     public List<Examination> getHistory(@PathVariable Integer patientId) {
+        accessService.checkCanAccessPatient(patientId);
         return patientService.getPatientHistory(patientId);
     }
 
@@ -69,6 +75,8 @@ public class PatientApiController {
 
     @PutMapping("/{id}")
     public Patient update(@PathVariable Integer id, @Valid @RequestBody PatientEditDto dto) {
+        accessService.checkCanAccessPatient(id);
+
         Patient existingPatient = patientService.getById(id);
         User user = userService.getById(dto.getUserId());
         Doctor personalDoctor = doctorService.getById(dto.getPersonalDoctorId());

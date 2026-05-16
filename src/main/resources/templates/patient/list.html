@@ -36,7 +36,7 @@
                 <td th:text="${p.personalDoctor.firstName + ' ' + p.personalDoctor.lastName}">Dr</td>
                 <td class="actions-row">
                     <a class="btn btn--ghost btn--sm" th:href="@{/patients/{id}(id=${p.id})}">View</a>
-                    <a sec:authorize="hasAnyRole('ADMIN','PATIENT')" class="btn btn--ghost btn--sm"
+                    <a sec:authorize="hasRole('ADMIN')" class="btn btn--ghost btn--sm"
                        th:href="@{/patients/{id}/edit(id=${p.id})}">Edit</a>
                 </td>
             </tr>

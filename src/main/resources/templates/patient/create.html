@@ -60,7 +60,7 @@
 
                 <div class="form-field">
                     <label for="dateOfBirth">Date of birth</label>
-                    <input id="dateOfBirth" name="dateOfBirth" type="date">
+                    <input id="dateOfBirth" name="dateOfBirth" type="date" th:max="${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}">
                     <span class="field-error" data-field-error="dateOfBirth"></span>
                 </div>
 
@@ -120,6 +120,12 @@
             if (!/^\d{10}$/.test(egn)) throw new Error("EGN must contain exactly 10 digits.");
             if (!firstName) throw new Error("First name is required.");
             if (!lastName) throw new Error("Last name is required.");
+            var dob = document.getElementById("dateOfBirth");
+            if (dob) {
+            var today = new Date();
+            today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+            dob.max = today.toISOString().slice(0, 10);
+}
 
             return {
                 userId: userId,

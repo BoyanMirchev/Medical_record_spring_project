@@ -75,6 +75,17 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 request.getRequestURI()
         );
     }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(
+            AccessDeniedException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.FORBIDDEN,
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(

@@ -8,6 +8,7 @@ import com.example.Medical_record_project_Final.data.repo.DoctorRepository;
 import com.example.Medical_record_project_Final.data.repo.ExaminationRepository;
 import com.example.Medical_record_project_Final.data.repo.PatientRepository;
 import com.example.Medical_record_project_Final.data.service.AccessService;
+import com.example.Medical_record_project_Final.exception.AccessDeniedException;
 import com.example.Medical_record_project_Final.util.LoggedUserUtil;
 import org.springframework.stereotype.Service;
 
@@ -27,20 +28,41 @@ public class AccessServiceImpl implements AccessService {
     }
 
     @Override
+    public boolean isAdmin() {
+        MedicalRecordUserDetails user = LoggedUserUtil.getLoggedUser();
+        return user != null && "ADMIN".equalsIgnoreCase(user.getRoleName());
+    }
+
+    @Override
+    public boolean isDoctor() {
+        MedicalRecordUserDetails user = LoggedUserUtil.getLoggedUser();
+        return user != null && "DOCTOR".equalsIgnoreCase(user.getRoleName());
+    }
+
+    @Override
+    public boolean isPatient() {
+        MedicalRecordUserDetails user = LoggedUserUtil.getLoggedUser();
+        return user != null && "PATIENT".equalsIgnoreCase(user.getRoleName());
+    }
+
+    @Override
+    public Integer getLoggedUserId() {
+        MedicalRecordUserDetails user = LoggedUserUtil.getLoggedUser();
+        return user != null ? user.getId() : null;
+    }
+
+    @Override
     public boolean canAccessPatient(Integer patientId) {
-        MedicalRecordUserDetails loggedUser = LoggedUserUtil.getLoggedUser();
-
-        if (loggedUser == null) {
-            return false;
-        }
-
-        if ("ADMIN".equalsIgnoreCase(loggedUser.getRoleName()) || "DOCTOR".equalsIgnoreCase(loggedUser.getRoleName())) {
+        if (isAdmin() || isDoctor()) {
             return true;
         }
 
-        if ("PATIENT".equalsIgnoreCase(loggedUser.getRoleName())) {
-            Patient patient = patientRepository.findById(patientId).orElse(null);
-            return patient != null && patient.getUser().getId().equals(loggedUser.getId());
+        if (isPatient()) {
+            Integer loggedUserId = getLoggedUserId();
+
+            return patientRepository.findById(patientId)
+                    .map(patient -> patient.getUser().getId().equals(loggedUserId))
+                    .orElse(false);
         }
 
         return false;
@@ -48,29 +70,16 @@ public class AccessServiceImpl implements AccessService {
 
     @Override
     public boolean canAccessExamination(Integer examinationId) {
-        MedicalRecordUserDetails loggedUser = LoggedUserUtil.getLoggedUser();
-
-        if (loggedUser == null) {
-            return false;
-        }
-
-        Examination examination = examinationRepository.findById(examinationId).orElse(null);
-
-        if (examination == null) {
-            return false;
-        }
-
-        if ("ADMIN".equalsIgnoreCase(loggedUser.getRoleName())) {
+        if (isAdmin() || isDoctor()) {
             return true;
         }
 
-        if ("DOCTOR".equalsIgnoreCase(loggedUser.getRoleName())) {
-            Doctor doctor = doctorRepository.findById(examination.getDoctor().getId()).orElse(null);
-            return doctor != null && doctor.getUser().getId().equals(loggedUser.getId());
-        }
+        if (isPatient()) {
+            Integer loggedUserId = getLoggedUserId();
 
-        if ("PATIENT".equalsIgnoreCase(loggedUser.getRoleName())) {
-            return examination.getPatient().getUser().getId().equals(loggedUser.getId());
+            return examinationRepository.findById(examinationId)
+                    .map(exam -> exam.getPatient().getUser().getId().equals(loggedUserId))
+                    .orElse(false);
         }
 
         return false;
@@ -78,32 +87,39 @@ public class AccessServiceImpl implements AccessService {
 
     @Override
     public boolean canEditExamination(Integer examinationId) {
-        MedicalRecordUserDetails loggedUser = LoggedUserUtil.getLoggedUser();
-
-        if (loggedUser == null) {
-            return false;
-        }
-
-        Examination examination = examinationRepository.findById(examinationId).orElse(null);
-
-        if (examination == null) {
-            return false;
-        }
-
-        if ("ADMIN".equalsIgnoreCase(loggedUser.getRoleName())) {
+        if (isAdmin()) {
             return true;
         }
 
-        if ("DOCTOR".equalsIgnoreCase(loggedUser.getRoleName())) {
-            return examination.getDoctor().getUser().getId().equals(loggedUser.getId());
+        if (isDoctor()) {
+            Integer loggedUserId = getLoggedUserId();
+
+            return examinationRepository.findById(examinationId)
+                    .map(exam -> exam.getDoctor().getUser().getId().equals(loggedUserId))
+                    .orElse(false);
         }
 
         return false;
     }
 
     @Override
-    public boolean isAdmin() {
-        MedicalRecordUserDetails loggedUser = LoggedUserUtil.getLoggedUser();
-        return loggedUser != null && "ADMIN".equalsIgnoreCase(loggedUser.getRoleName());
+    public void checkCanAccessPatient(Integer patientId) {
+        if (!canAccessPatient(patientId)) {
+            throw new AccessDeniedException("You do not have access to this patient.");
+        }
+    }
+
+    @Override
+    public void checkCanAccessExamination(Integer examinationId) {
+        if (!canAccessExamination(examinationId)) {
+            throw new AccessDeniedException("You do not have access to this examination.");
+        }
+    }
+
+    @Override
+    public void checkCanEditExamination(Integer examinationId) {
+        if (!canEditExamination(examinationId)) {
+            throw new AccessDeniedException("You cannot edit this examination.");
+        }
     }
 }

@@ -140,6 +140,12 @@
                 var lastName = f.lastName.value.trim();
                 var dob = f.dateOfBirth.value;
                 var gender = f.gender.value.trim();
+                var dob = document.getElementById("dateOfBirth");
+                if (dob) {
+                var today = new Date();
+                today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+                dob.max = today.toISOString().slice(0, 10);
+            }
 
                 if (!userId) throw new Error("User account is required.");
                 if (!personalDoctorId) throw new Error("Personal doctor is required.");

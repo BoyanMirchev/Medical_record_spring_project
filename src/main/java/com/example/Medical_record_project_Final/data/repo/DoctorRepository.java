@@ -13,6 +13,8 @@ public interface DoctorRepository extends JpaRepository<Doctor, Integer> {
 
     Optional<Doctor> findByDoctorIdentifier(String doctorIdentifier);
 
+    Optional<Doctor> findByUserId(Integer userId);
+
     boolean existsByDoctorIdentifier(String doctorIdentifier);
 
     List<Doctor> findAllByCanBePersonalDoctorTrue();

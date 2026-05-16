@@ -18,10 +18,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/login", "/register", "/error", "/css/**", "/js/**", "/images/**").permitAll()
 
-                        .requestMatchers("/diagnoses/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
-                        .requestMatchers("/doctors/**").hasAnyRole("ADMIN", "DOCTOR")
                         .requestMatchers("/patients/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
                         .requestMatchers("/examinations/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
+                        .requestMatchers("/diagnoses/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
+                        .requestMatchers("/doctors/**").hasAnyRole("ADMIN", "DOCTOR")
                         .requestMatchers("/sick-leaves/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
 
                         .requestMatchers(HttpMethod.GET, "/api/diagnoses/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")

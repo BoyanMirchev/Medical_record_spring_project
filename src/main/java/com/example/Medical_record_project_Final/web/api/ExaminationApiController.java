@@ -4,12 +4,10 @@ import com.example.Medical_record_project_Final.data.entity.Diagnosis;
 import com.example.Medical_record_project_Final.data.entity.Doctor;
 import com.example.Medical_record_project_Final.data.entity.Examination;
 import com.example.Medical_record_project_Final.data.entity.Patient;
-import com.example.Medical_record_project_Final.data.service.DiagnosisService;
-import com.example.Medical_record_project_Final.data.service.DoctorService;
-import com.example.Medical_record_project_Final.data.service.ExaminationService;
-import com.example.Medical_record_project_Final.data.service.PatientService;
+import com.example.Medical_record_project_Final.data.service.*;
 import com.example.Medical_record_project_Final.dto.ExaminationCreateDto;
 import com.example.Medical_record_project_Final.dto.ExaminationEditDto;
+import com.example.Medical_record_project_Final.exception.AccessDeniedException;
 import com.example.Medical_record_project_Final.mapper.ExaminationMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -27,15 +25,17 @@ public class ExaminationApiController {
     private final DoctorService doctorService;
     private final PatientService patientService;
     private final DiagnosisService diagnosisService;
+    private final AccessService accessService;
 
     public ExaminationApiController(ExaminationService examinationService,
                                     DoctorService doctorService,
                                     PatientService patientService,
-                                    DiagnosisService diagnosisService) {
+                                    DiagnosisService diagnosisService, AccessService accessService) {
         this.examinationService = examinationService;
         this.doctorService = doctorService;
         this.patientService = patientService;
         this.diagnosisService = diagnosisService;
+        this.accessService = accessService;
     }
 
     @GetMapping
@@ -45,6 +45,7 @@ public class ExaminationApiController {
 
     @GetMapping("/{id}")
     public Examination getById(@PathVariable Integer id) {
+        accessService.checkCanAccessExamination(id);
         return examinationService.getById(id);
     }
 
@@ -99,6 +100,8 @@ public class ExaminationApiController {
 
     @PutMapping("/{id}")
     public Examination update(@PathVariable Integer id, @Valid @RequestBody ExaminationEditDto dto) {
+        accessService.checkCanEditExamination(id);
+
         Examination existingExamination = examinationService.getById(id);
         Doctor doctor = doctorService.getById(dto.getDoctorId());
         Patient patient = patientService.getById(dto.getPatientId());
@@ -111,6 +114,10 @@ public class ExaminationApiController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Integer id) {
+        if (!accessService.isAdmin()) {
+            throw new AccessDeniedException("Only admin can delete examinations.");
+        }
+
         examinationService.deleteById(id);
     }
 }

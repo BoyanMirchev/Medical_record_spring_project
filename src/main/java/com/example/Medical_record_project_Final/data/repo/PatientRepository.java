@@ -15,6 +15,8 @@ public interface PatientRepository extends JpaRepository<Patient, Integer> {
 
     Optional<Patient> findByEgn(String egn);
 
+    Optional<Patient> findByUserId(Integer userId);
+
     boolean existsByEgn(String egn);
 
     List<Patient> findAllByPersonalDoctor(Doctor personalDoctor);

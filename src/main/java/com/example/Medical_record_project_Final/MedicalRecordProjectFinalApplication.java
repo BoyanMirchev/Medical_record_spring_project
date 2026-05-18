@@ -11,8 +11,3 @@ public class MedicalRecordProjectFinalApplication {
 	}
 
 }
- // Да оправя достъпа за ролите
-
- // Да направя правилната ЕЕР диаграма според мен
-
- // Още тестове на Repository и Controller

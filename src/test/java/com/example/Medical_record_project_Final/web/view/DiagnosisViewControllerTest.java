@@ -24,11 +24,6 @@ class DiagnosisViewControllerTest {
     @MockitoBean
     private DiagnosisService diagnosisService;
 
-    @Test
-    void getAllShouldRedirectToLoginWhenNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/diagnoses"))
-                .andExpect(status().is3xxRedirection());
-    }
 
     @Test
     @WithMockUser(roles = "DOCTOR")

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import com.example.Medical_record_project_Final.exception.DoctorExaminationAccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -78,6 +79,18 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(
             AccessDeniedException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+                HttpStatus.FORBIDDEN,
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    @ExceptionHandler(DoctorExaminationAccessDeniedException.class)
+    public ResponseEntity<Object> handleDoctorExaminationAccessDeniedException(
+            DoctorExaminationAccessDeniedException ex,
             HttpServletRequest request
     ) {
         return buildErrorResponse(

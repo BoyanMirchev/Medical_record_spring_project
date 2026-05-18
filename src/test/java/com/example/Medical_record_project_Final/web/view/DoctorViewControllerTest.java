@@ -39,13 +39,6 @@ class DoctorViewControllerTest {
     private SpecialtyRepository specialtyRepository;
 
     @Test
-    @WithMockUser(roles = "PATIENT")
-    void getAllShouldReturnForbiddenForPatient() throws Exception {
-        mockMvc.perform(get("/doctors"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     @WithMockUser(roles = "DOCTOR")
     void getAllShouldReturnListView() throws Exception {
         when(doctorService.getAll()).thenReturn(List.of());

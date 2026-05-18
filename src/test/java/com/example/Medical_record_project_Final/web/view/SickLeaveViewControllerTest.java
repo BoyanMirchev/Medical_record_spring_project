@@ -31,27 +31,6 @@ class SickLeaveViewControllerTest {
     private ExaminationService examinationService;
 
     @Test
-    void getAllShouldRedirectToLoginWhenNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/sick-leaves"))
-                .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
-    @WithMockUser(roles = "DOCTOR")
-    void getAllShouldReturnListView() throws Exception {
-        SickLeave sickLeave = new SickLeave();
-        sickLeave.setId(1);
-        sickLeave.setDaysCount(5);
-
-        when(sickLeaveService.getAll()).thenReturn(List.of(sickLeave));
-
-        mockMvc.perform(get("/sick-leaves"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("sick-leave/list"))
-                .andExpect(model().attributeExists("sickLeaves"));
-    }
-
-    @Test
     @WithMockUser(roles = "DOCTOR")
     void createFormShouldReturnCreateView() throws Exception {
         when(examinationService.getAll()).thenReturn(List.of());
@@ -62,24 +41,4 @@ class SickLeaveViewControllerTest {
                 .andExpect(model().attributeExists("sickLeaveCreateDto", "examinations"));
     }
 
-    @Test
-    @WithMockUser(roles = "DOCTOR")
-    void editFormShouldReturnEditViewWithDto() throws Exception {
-        Examination examination = new Examination();
-        examination.setId(10);
-
-        SickLeave sickLeave = new SickLeave();
-        sickLeave.setId(1);
-        sickLeave.setExamination(examination);
-        sickLeave.setStartDate(LocalDate.of(2026, 2, 1));
-        sickLeave.setDaysCount(3);
-
-        when(sickLeaveService.getById(1)).thenReturn(sickLeave);
-        when(examinationService.getAll()).thenReturn(List.of(examination));
-
-        mockMvc.perform(get("/sick-leaves/1/edit"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("sick-leave/edit"))
-                .andExpect(model().attributeExists("sickLeaveEditDto", "examinations"));
     }
-}

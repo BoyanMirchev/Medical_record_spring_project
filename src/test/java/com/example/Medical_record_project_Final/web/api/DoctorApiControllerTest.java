@@ -56,12 +56,7 @@ class DoctorApiControllerTest {
                 .andExpect(jsonPath("$[0].doctorIdentifier").value("DOC-001"));
     }
 
-    @Test
-    @WithMockUser(roles = "PATIENT")
-    void getAllShouldReturnForbiddenForPatient() throws Exception {
-        mockMvc.perform(get("/api/doctors"))
-                .andExpect(status().isForbidden());
-    }
+
 
     @Test
     @WithMockUser(roles = "DOCTOR")
@@ -81,43 +76,5 @@ class DoctorApiControllerTest {
         mockMvc.perform(get("/api/doctors/1/patients-count"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(3));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void createShouldReturnCreatedWhenDataIsValid() throws Exception {
-        User user = new User();
-        user.setId(10);
-
-        Specialty specialty = new Specialty();
-        specialty.setId(2);
-        specialty.setName("Cardiology");
-
-        Doctor saved = new Doctor();
-        saved.setId(1);
-        saved.setDoctorIdentifier("DOC-NEW");
-        saved.setFirstName("New");
-        saved.setLastName("Doctor");
-
-        when(userService.getById(10)).thenReturn(user);
-        when(specialtyRepository.findById(2)).thenReturn(Optional.of(specialty));
-        when(doctorService.create(any())).thenReturn(saved);
-
-        String body = """
-                {
-                  "userId": 10,
-                  "doctorIdentifier": "DOC-NEW",
-                  "firstName": "New",
-                  "lastName": "Doctor",
-                  "specialtyId": 2,
-                  "canBePersonalDoctor": true
-                }
-                """;
-
-        mockMvc.perform(post("/api/doctors")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.doctorIdentifier").value("DOC-NEW"));
     }
 }

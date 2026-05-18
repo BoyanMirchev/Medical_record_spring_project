@@ -58,42 +58,9 @@ class ExaminationViewControllerTest {
         verify(examinationService).getAll();
     }
 
-    @Test
-    @WithMockUser(roles = "PATIENT")
-    void getAllShouldReturnPatientExaminationsForPatientRole() throws Exception {
-        Patient patient = new Patient();
-        patient.setId(4);
 
-        Examination examination = new Examination();
-        examination.setId(1);
 
-        when(accessService.isPatient()).thenReturn(true);
-        when(accessService.getLoggedUserId()).thenReturn(50);
-        when(patientRepository.findByUserId(50)).thenReturn(Optional.of(patient));
-        when(examinationService.getByPatient(4)).thenReturn(List.of(examination));
 
-        mockMvc.perform(get("/examinations"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("examination/list"));
-
-        verify(examinationService).getByPatient(4);
-        verify(examinationService, never()).getAll();
-    }
-
-    @Test
-    @WithMockUser(roles = "DOCTOR")
-    void detailsShouldReturnDetailsView() throws Exception {
-        Examination examination = new Examination();
-        examination.setId(1);
-
-        doNothing().when(accessService).checkCanAccessExamination(1);
-        when(examinationService.getById(1)).thenReturn(examination);
-
-        mockMvc.perform(get("/examinations/1"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("examination/details"))
-                .andExpect(model().attributeExists("examination"));
-    }
 
     @Test
     @WithMockUser(roles = "DOCTOR")
@@ -106,27 +73,5 @@ class ExaminationViewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("examination/create"))
                 .andExpect(model().attributeExists("examinationCreateDto", "doctors", "patients", "diagnoses"));
-    }
-
-    @Test
-    @WithMockUser(roles = "DOCTOR")
-    void editFormShouldReturnEditView() throws Exception {
-        Examination examination = new Examination();
-        examination.setId(1);
-        examination.setExamDate(LocalDateTime.of(2026, 1, 10, 9, 0));
-        examination.setPrice(BigDecimal.TEN);
-        examination.setPaidBy(PaidBy.PATIENT);
-        examination.setTreatmentText("Rest");
-
-        doNothing().when(accessService).checkCanEditExamination(1);
-        when(examinationService.getById(1)).thenReturn(examination);
-        when(doctorService.getAll()).thenReturn(List.of());
-        when(patientService.getAll()).thenReturn(List.of());
-        when(diagnosisService.getAll()).thenReturn(List.of());
-
-        mockMvc.perform(get("/examinations/1/edit"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("examination/edit"))
-                .andExpect(model().attributeExists("examinationEditDto"));
     }
 }

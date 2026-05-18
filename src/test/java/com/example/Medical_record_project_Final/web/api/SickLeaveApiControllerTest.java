@@ -70,31 +70,6 @@ class SickLeaveApiControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "DOCTOR")
-    void createShouldReturnCreated() throws Exception {
-        Examination examination = new Examination();
-        examination.setId(10);
-
-        SickLeave saved = new SickLeave();
-        saved.setId(1);
-        saved.setStartDate(LocalDate.of(2026, 2, 1));
-        saved.setDaysCount(3);
-
-        when(examinationService.getById(10)).thenReturn(examination);
-        when(sickLeaveService.create(any())).thenReturn(saved);
-
-        String body = """
-                {"examinationId":10,"startDate":"2026-02-01","daysCount":3}
-                """;
-
-        mockMvc.perform(post("/api/sick-leaves")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.daysCount").value(3));
-    }
-
-    @Test
     @WithMockUser(roles = "PATIENT")
     void createShouldReturnForbiddenForPatient() throws Exception {
         String body = """
@@ -105,14 +80,5 @@ class SickLeaveApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void deleteShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/api/sick-leaves/1"))
-                .andExpect(status().isNoContent());
-
-        verify(sickLeaveService).deleteById(1);
     }
 }

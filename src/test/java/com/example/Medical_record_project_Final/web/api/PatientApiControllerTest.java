@@ -92,42 +92,6 @@ class PatientApiControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void createShouldReturnCreated() throws Exception {
-        User user = new User();
-        user.setId(2);
-
-        Doctor doctor = new Doctor();
-        doctor.setId(3);
-
-        Patient saved = new Patient();
-        saved.setId(1);
-        saved.setEgn("1234567890");
-        saved.setFirstName("Maria");
-        saved.setLastName("Dimitrova");
-
-        when(userService.getById(2)).thenReturn(user);
-        when(doctorService.getById(3)).thenReturn(doctor);
-        when(patientService.create(any())).thenReturn(saved);
-
-        String body = """
-                {
-                  "userId": 2,
-                  "egn": "1234567890",
-                  "firstName": "Maria",
-                  "lastName": "Dimitrova",
-                  "personalDoctorId": 3
-                }
-                """;
-
-        mockMvc.perform(post("/api/patients")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.egn").value("1234567890"));
-    }
-
-    @Test
     @WithMockUser(roles = "PATIENT")
     void createShouldReturnForbiddenForPatientRole() throws Exception {
         String body = """

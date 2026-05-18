@@ -9,6 +9,7 @@ import com.example.Medical_record_project_Final.data.repo.ExaminationRepository;
 import com.example.Medical_record_project_Final.data.repo.PatientRepository;
 import com.example.Medical_record_project_Final.data.service.AccessService;
 import com.example.Medical_record_project_Final.exception.AccessDeniedException;
+import com.example.Medical_record_project_Final.exception.DoctorExaminationAccessDeniedException;
 import com.example.Medical_record_project_Final.util.LoggedUserUtil;
 import org.springframework.stereotype.Service;
 
@@ -119,7 +120,7 @@ public class AccessServiceImpl implements AccessService {
     @Override
     public void checkCanEditExamination(Integer examinationId) {
         if (!canEditExamination(examinationId)) {
-            throw new AccessDeniedException("You cannot edit this examination.");
+            throw new DoctorExaminationAccessDeniedException();
         }
     }
 }

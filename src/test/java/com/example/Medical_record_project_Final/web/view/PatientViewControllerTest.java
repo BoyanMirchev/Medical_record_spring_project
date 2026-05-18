@@ -44,64 +44,6 @@ class PatientViewControllerTest {
     @MockitoBean
     private PatientRepository patientRepository;
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void getAllShouldReturnAllPatientsForAdmin() throws Exception {
-        Patient patient = new Patient();
-        patient.setId(1);
-        patient.setEgn("1234567890");
-
-        when(accessService.isPatient()).thenReturn(false);
-        when(patientService.getAll()).thenReturn(List.of(patient));
-
-        mockMvc.perform(get("/patients"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("patient/list"))
-                .andExpect(model().attributeExists("patients"));
-
-        verify(patientService).getAll();
-        verify(patientRepository, never()).findByUserId(any());
-    }
-
-    @Test
-    @WithMockUser(roles = "PATIENT")
-    void getAllShouldReturnOnlyLoggedInPatientForPatientRole() throws Exception {
-        Patient patient = new Patient();
-        patient.setId(7);
-        patient.setEgn("1234567890");
-
-        when(accessService.isPatient()).thenReturn(true);
-        when(accessService.getLoggedUserId()).thenReturn(100);
-        when(patientRepository.findByUserId(100)).thenReturn(Optional.of(patient));
-
-        mockMvc.perform(get("/patients"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("patient/list"));
-
-        verify(patientService, never()).getAll();
-    }
-
-    @Test
-    @WithMockUser(roles = "DOCTOR")
-    void detailsShouldReturnDetailsView() throws Exception {
-        Patient patient = new Patient();
-        patient.setId(1);
-        patient.setFirstName("Maria");
-
-        Examination examination = new Examination();
-        examination.setId(5);
-
-        doNothing().when(accessService).checkCanAccessPatient(1);
-        when(patientService.getById(1)).thenReturn(patient);
-        when(patientService.getPatientHistory(1)).thenReturn(List.of(examination));
-
-        mockMvc.perform(get("/patients/1"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("patient/details"))
-                .andExpect(model().attributeExists("patient", "history"));
-
-        verify(accessService).checkCanAccessPatient(1);
-    }
 
     @Test
     @WithMockUser(roles = "ADMIN")

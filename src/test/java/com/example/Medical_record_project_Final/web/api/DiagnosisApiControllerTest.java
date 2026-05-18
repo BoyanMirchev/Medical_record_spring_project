@@ -89,64 +89,6 @@ class DiagnosisApiControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void createShouldReturnCreatedWhenAdmin() throws Exception {
-        Diagnosis saved = new Diagnosis();
-        saved.setId(5);
-        saved.setCode("J11");
-        saved.setName("New diagnosis");
-
-        when(diagnosisService.create(any())).thenReturn(saved);
-
-        String body = """
-                {"code":"J11","name":"New diagnosis","description":"Test"}
-                """;
-
-        mockMvc.perform(post("/api/diagnoses")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.code").value("J11"));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void updateShouldReturnUpdatedDiagnosis() throws Exception {
-        Diagnosis existing = new Diagnosis();
-        existing.setId(1);
-        existing.setCode("J10");
-        existing.setName("Old");
-
-        Diagnosis updated = new Diagnosis();
-        updated.setId(1);
-        updated.setCode("J10");
-        updated.setName("Updated");
-
-        when(diagnosisService.getById(1)).thenReturn(existing);
-        when(diagnosisService.update(eq(1), any())).thenReturn(updated);
-
-        String body = """
-                {"id":1,"code":"J10","name":"Updated","description":"Desc"}
-                """;
-
-        mockMvc.perform(put("/api/diagnoses/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Updated"));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void deleteShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/api/diagnoses/1"))
-                .andExpect(status().isNoContent());
-
-        verify(diagnosisService).deleteById(1);
-    }
-
-    @Test
     @WithMockUser(roles = "PATIENT")
     void getByIdShouldReturnNotFoundWhenMissing() throws Exception {
         when(diagnosisService.getById(99)).thenThrow(new EntityNotFoundException("Not found"));

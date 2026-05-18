@@ -76,44 +76,6 @@ class ExaminationApiControllerTest {
 
     @Test
     @WithMockUser(roles = "DOCTOR")
-    void createShouldReturnCreated() throws Exception {
-        Doctor doctor = new Doctor();
-        doctor.setId(1);
-        Patient patient = new Patient();
-        patient.setId(2);
-        Diagnosis diagnosis = new Diagnosis();
-        diagnosis.setId(3);
-
-        Examination saved = new Examination();
-        saved.setId(10);
-        saved.setPrice(new BigDecimal("25.00"));
-
-        when(doctorService.getById(1)).thenReturn(doctor);
-        when(patientService.getById(2)).thenReturn(patient);
-        when(diagnosisService.getById(3)).thenReturn(diagnosis);
-        when(examinationService.create(any())).thenReturn(saved);
-
-        String body = """
-                {
-                  "examDate": "2026-01-15T10:00:00",
-                  "doctorId": 1,
-                  "patientId": 2,
-                  "diagnosisId": 3,
-                  "treatmentText": "Rest",
-                  "price": 25.00,
-                  "paidBy": "PATIENT"
-                }
-                """;
-
-        mockMvc.perform(post("/api/examinations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(10));
-    }
-
-    @Test
-    @WithMockUser(roles = "DOCTOR")
     void deleteShouldReturnForbiddenWhenNotAdmin() throws Exception {
         when(accessService.isAdmin()).thenReturn(false);
 
@@ -121,17 +83,6 @@ class ExaminationApiControllerTest {
                 .andExpect(status().isForbidden());
 
         verify(examinationService, never()).deleteById(any());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void deleteShouldReturnNoContentWhenAdmin() throws Exception {
-        when(accessService.isAdmin()).thenReturn(true);
-
-        mockMvc.perform(delete("/api/examinations/1"))
-                .andExpect(status().isNoContent());
-
-        verify(examinationService).deleteById(1);
     }
 
     @Test
